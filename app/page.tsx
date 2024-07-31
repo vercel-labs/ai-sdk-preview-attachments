@@ -1,113 +1,250 @@
-import Image from "next/image";
+/* eslint-disable @next/next/no-img-element */
+"use client";
+
+import { BotIcon, UserIcon } from "@/components/icons";
+import { useChat } from "ai/react";
+import { DragEvent, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
+
+const getTextFromDataUrl = (dataUrl: string) => {
+  const base64 = dataUrl.split(",")[1];
+  return window.atob(base64);
+};
+
+function TextFilePreview({ file }: { file: File }) {
+  const [content, setContent] = useState<string>("");
+
+  useEffect(() => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result;
+      setContent(typeof text === "string" ? text.slice(0, 100) : "");
+    };
+    reader.readAsText(file);
+  }, [file]);
+
+  return (
+    <div>
+      {content}
+      {content.length >= 100 && "..."}
+    </div>
+  );
+}
 
 export default function Home() {
+  const { messages, input, handleSubmit, handleInputChange, isLoading } =
+    useChat({
+      onError: () => toast.error("You can only send 8 messages at a time!"),
+    });
+
+  const [files, setFiles] = useState<FileList | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handlePaste = (event: React.ClipboardEvent) => {
+    const items = event.clipboardData?.items;
+
+    if (items) {
+      const files = Array.from(items)
+        .map((item) => item.getAsFile())
+        .filter((file): file is File => file !== null);
+
+      if (files.length > 0) {
+        const validFiles = files.filter(
+          (file) =>
+            file.type.startsWith("image/") || file.type.startsWith("text/")
+        );
+
+        if (validFiles.length === files.length) {
+          const dataTransfer = new DataTransfer();
+          validFiles.forEach((file) => dataTransfer.items.add(file));
+          setFiles(dataTransfer.files);
+        } else {
+          toast.error("Only image and text files are allowed");
+        }
+      }
+    }
+  };
+
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    const droppedFiles = event.dataTransfer.files;
+    const droppedFilesArray = Array.from(droppedFiles);
+    if (droppedFilesArray.length > 0) {
+      const validFiles = droppedFilesArray.filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type.startsWith("text/")
+      );
+
+      if (validFiles.length === droppedFilesArray.length) {
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach((file) => dataTransfer.items.add(file));
+        setFiles(dataTransfer.files);
+      } else {
+        toast.error("Only image and text files are allowed!");
+      }
+
+      setFiles(droppedFiles);
+    }
+    setIsDragging(false);
+  };
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:size-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div
+      className="flex flex-row justify-center items-center h-dvh bg-white dark:bg-zinc-900"
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            className="fixed pointer-events-none dark:bg-zinc-900/90 h-dvh w-dvw z-10 flex flex-row justify-center items-center flex flex-col gap-1 bg-zinc-100/90"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
           >
-            By{" "}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+            <div>Drag and drop files here</div>
+            <div className="text-sm dark:text-zinc-400 text-zinc-500">
+              {"(images and text)"}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <div className="flex flex-col justify-between w-[500px] p-2 gap-4">
+        <div className="flex flex-col gap-2 h-[350px] overflow-y-scroll">
+          {messages.map((message) => (
+            <motion.div
+              key={message.id}
+              className="flex flex-row gap-2"
+              initial={{ y: 5, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+            >
+              <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                {message.role === "assistant" ? <BotIcon /> : <UserIcon />}
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <div className="text-zinc-800 dark:text-zinc-300">
+                  {message.content}
+                </div>
+                <div className="flex flex-row gap-2">
+                  {message.experimental_attachments?.map((attachment) =>
+                    attachment.contentType?.startsWith("image") ? (
+                      <img
+                        className="rounded-md w-40 mb-3"
+                        key={attachment.name}
+                        src={attachment.url}
+                        alt={attachment.name}
+                      />
+                    ) : attachment.contentType?.startsWith("text") ? (
+                      <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
+                        {getTextFromDataUrl(attachment.url)}
+                      </div>
+                    ) : null
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+
+          {isLoading && messages[messages.length - 1].role !== "assistant" && (
+            <div className="flex flex-row gap-2">
+              <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                <BotIcon />
+              </div>
+              <div className="flex flex-col gap-1 text-zinc-400">
+                <div>hmm...</div>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
         </div>
+
+        <form
+          className="flex flex-col gap-2 relative"
+          onSubmit={(event) => {
+            const options = files ? { experimental_attachments: files } : {};
+            handleSubmit(event, options);
+            setFiles(null);
+          }}
+        >
+          <AnimatePresence>
+            {files && files.length > 0 && (
+              <div className="flex flex-row gap-2 absolute bottom-12">
+                {Array.from(files).map((file) =>
+                  file.type.startsWith("image") ? (
+                    <div key={file.name}>
+                      <motion.img
+                        src={URL.createObjectURL(file)}
+                        alt={file.name}
+                        className="rounded-md w-16"
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{
+                          y: -10,
+                          scale: 1.1,
+                          opacity: 0,
+                          transition: { duration: 0.2 },
+                        }}
+                      />
+                    </div>
+                  ) : file.type.startsWith("text") ? (
+                    <motion.div
+                      key={file.name}
+                      className="text-[8px] leading-1 w-28 h-16 overflow-hidden text-zinc-500 border p-2 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700"
+                      initial={{ scale: 0.8, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{
+                        y: -10,
+                        scale: 1.1,
+                        opacity: 0,
+                        transition: { duration: 0.2 },
+                      }}
+                    >
+                      <TextFilePreview file={file} />
+                    </motion.div>
+                  ) : null
+                )}
+              </div>
+            )}
+          </AnimatePresence>
+
+          <motion.input
+            ref={inputRef}
+            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300"
+            placeholder="Send a message..."
+            value={input}
+            onChange={handleInputChange}
+            onPaste={handlePaste}
+            initial={{ y: 30, opacity: 0, scale: 0.5 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+          />
+        </form>
       </div>
-
-      <div className="relative z-[-1] flex place-items-center before:absolute before:h-[300px] before:w-full before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-full after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 sm:before:w-[480px] sm:after:w-[240px] before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className="mb-32 grid text-center lg:mb-0 lg:w-full lg:max-w-5xl lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Docs{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Learn{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Templates{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-sm opacity-50">
-            Explore starter templates for Next.js.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className="mb-3 text-2xl font-semibold">
-            Deploy{" "}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className="m-0 max-w-[30ch] text-balance text-sm opacity-50">
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
+    </div>
   );
 }
