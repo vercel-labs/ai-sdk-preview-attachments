@@ -114,7 +114,7 @@ export default function Home() {
 
   return (
     <div
-      className="flex flex-row justify-center items-center h-dvh bg-white dark:bg-zinc-900"
+      className="flex flex-row justify-center pb-20 h-dvh bg-white dark:bg-zinc-900"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -135,13 +135,15 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col justify-between w-[500px] p-2 gap-4">
+      <div className="flex flex-col justify-between gap-4">
         {messages.length > 0 ? (
-          <div className="flex flex-col gap-2 h-[350px] overflow-y-scroll">
-            {messages.map((message) => (
+          <div className="flex flex-col gap-2 h-full w-dvw items-center overflow-y-scroll">
+            {messages.map((message, index) => (
               <motion.div
                 key={message.id}
-                className="flex flex-row gap-2"
+                className={`flex flex-row gap-2 w-[500px] ${
+                  index === 0 ? "pt-20" : ""
+                }`}
                 initial={{ y: 5, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
               >
@@ -175,7 +177,7 @@ export default function Home() {
 
             {isLoading &&
               messages[messages.length - 1].role !== "assistant" && (
-                <div className="flex flex-row gap-2">
+                <div className="flex flex-row gap-2 w-[500px]">
                   <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
                     <BotIcon />
                   </div>
@@ -188,8 +190,8 @@ export default function Home() {
             <div ref={messagesEndRef} />
           </div>
         ) : (
-          <motion.div className="h-[350px]">
-            <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm">
+          <motion.div className="h-[350px] w-[500px] pt-20">
+            <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
               <p className="flex flex-row justify-center">
                 <AttachmentIcon />
               </p>
@@ -203,7 +205,7 @@ export default function Home() {
                 {" "}
                 Learn more about the{" "}
                 <Link
-                  className="text-blue-500"
+                  className="text-blue-500 dark:text-blue-400"
                   href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#attachments-experimental"
                   target="_blank"
                 >
@@ -216,7 +218,7 @@ export default function Home() {
         )}
 
         <form
-          className="flex flex-col gap-2 relative"
+          className="flex flex-col gap-2 relative items-center"
           onSubmit={(event) => {
             const options = files ? { experimental_attachments: files } : {};
             handleSubmit(event, options);
@@ -225,7 +227,7 @@ export default function Home() {
         >
           <AnimatePresence>
             {files && files.length > 0 && (
-              <div className="flex flex-row gap-2 absolute bottom-12">
+              <div className="flex flex-row gap-2 absolute bottom-12 w-[500px]">
                 {Array.from(files).map((file) =>
                   file.type.startsWith("image") ? (
                     <div key={file.name}>
@@ -266,7 +268,7 @@ export default function Home() {
 
           <input
             ref={inputRef}
-            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300"
+            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 max-w-[500px]"
             placeholder="Send a message..."
             value={input}
             onChange={handleInputChange}
