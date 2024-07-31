@@ -1,11 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { BotIcon, UserIcon } from "@/components/icons";
+import { AttachmentIcon, BotIcon, UserIcon } from "@/components/icons";
 import { useChat } from "ai/react";
 import { DragEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
+import Link from "next/link";
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1];
@@ -35,7 +36,8 @@ function TextFilePreview({ file }: { file: File }) {
 export default function Home() {
   const { messages, input, handleSubmit, handleInputChange, isLoading } =
     useChat({
-      onError: () => toast.error("You can only send 8 messages at a time!"),
+      onError: () =>
+        toast.error("You've been rate limited, please try again later!"),
     });
 
   const [files, setFiles] = useState<FileList | null>(null);
@@ -134,55 +136,84 @@ export default function Home() {
       </AnimatePresence>
 
       <div className="flex flex-col justify-between w-[500px] p-2 gap-4">
-        <div className="flex flex-col gap-2 h-[350px] overflow-y-scroll">
-          {messages.map((message) => (
-            <motion.div
-              key={message.id}
-              className="flex flex-row gap-2"
-              initial={{ y: 5, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-            >
-              <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
-                {message.role === "assistant" ? <BotIcon /> : <UserIcon />}
-              </div>
-
-              <div className="flex flex-col gap-1">
-                <div className="text-zinc-800 dark:text-zinc-300">
-                  {message.content}
+        {messages.length > 0 ? (
+          <div className="flex flex-col gap-2 h-[350px] overflow-y-scroll">
+            {messages.map((message) => (
+              <motion.div
+                key={message.id}
+                className="flex flex-row gap-2"
+                initial={{ y: 5, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+              >
+                <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                  {message.role === "assistant" ? <BotIcon /> : <UserIcon />}
                 </div>
+
+                <div className="flex flex-col gap-1">
+                  <div className="text-zinc-800 dark:text-zinc-300">
+                    {message.content}
+                  </div>
+                  <div className="flex flex-row gap-2">
+                    {message.experimental_attachments?.map((attachment) =>
+                      attachment.contentType?.startsWith("image") ? (
+                        <img
+                          className="rounded-md w-40 mb-3"
+                          key={attachment.name}
+                          src={attachment.url}
+                          alt={attachment.name}
+                        />
+                      ) : attachment.contentType?.startsWith("text") ? (
+                        <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
+                          {getTextFromDataUrl(attachment.url)}
+                        </div>
+                      ) : null
+                    )}
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+
+            {isLoading &&
+              messages[messages.length - 1].role !== "assistant" && (
                 <div className="flex flex-row gap-2">
-                  {message.experimental_attachments?.map((attachment) =>
-                    attachment.contentType?.startsWith("image") ? (
-                      <img
-                        className="rounded-md w-40 mb-3"
-                        key={attachment.name}
-                        src={attachment.url}
-                        alt={attachment.name}
-                      />
-                    ) : attachment.contentType?.startsWith("text") ? (
-                      <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
-                        {getTextFromDataUrl(attachment.url)}
-                      </div>
-                    ) : null
-                  )}
+                  <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
+                    <BotIcon />
+                  </div>
+                  <div className="flex flex-col gap-1 text-zinc-400">
+                    <div>hmm...</div>
+                  </div>
                 </div>
-              </div>
-            </motion.div>
-          ))}
+              )}
 
-          {isLoading && messages[messages.length - 1].role !== "assistant" && (
-            <div className="flex flex-row gap-2">
-              <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
-                <BotIcon />
-              </div>
-              <div className="flex flex-col gap-1 text-zinc-400">
-                <div>hmm...</div>
-              </div>
+            <div ref={messagesEndRef} />
+          </div>
+        ) : (
+          <motion.div className="h-[350px]">
+            <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm">
+              <p className="flex flex-row justify-center">
+                <AttachmentIcon />
+              </p>
+              <p>
+                The useChat hook supports sending attachments along with
+                messages as well as rendering previews on the client. This can
+                be useful for building applications that involve sending images,
+                files, and other media content to the AI provider.
+              </p>
+              <p>
+                {" "}
+                Learn more about the{" "}
+                <Link
+                  className="text-blue-500"
+                  href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#attachments-experimental"
+                  target="_blank"
+                >
+                  useChat{" "}
+                </Link>
+                hook from Vercel AI SDK.
+              </p>
             </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
+          </motion.div>
+        )}
 
         <form
           className="flex flex-col gap-2 relative"
@@ -233,15 +264,13 @@ export default function Home() {
             )}
           </AnimatePresence>
 
-          <motion.input
+          <input
             ref={inputRef}
             className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300"
             placeholder="Send a message..."
             value={input}
             onChange={handleInputChange}
             onPaste={handlePaste}
-            initial={{ y: 30, opacity: 0, scale: 0.5 }}
-            animate={{ y: 0, opacity: 1, scale: 1 }}
           />
         </form>
       </div>
