@@ -8,6 +8,12 @@ dependencies:
   '@ai-sdk/openai':
     specifier: ^0.0.40
     version: 0.0.40(zod@3.23.8)
+  '@vercel/analytics':
+    specifier: ^1.3.1
+    version: 1.3.1(next@14.2.5)(react@18.3.1)
+  '@vercel/kv':
+    specifier: ^2.0.0
+    version: 2.0.0
   ai:
     specifier: ^3.2.43
     version: 3.2.43(react@18.3.1)(svelte@4.2.18)(vue@3.4.35)(zod@3.23.8)
@@ -550,6 +556,35 @@ packages:
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
     dev: true
 
+  /@upstash/redis@1.34.0:
+    resolution: {integrity: sha512-TrXNoJLkysIl8SBc4u9bNnyoFYoILpCcFJcLyWCccb/QSUmaVKdvY0m5diZqc3btExsapcMbaw/s/wh9Sf1pJw==}
+    dependencies:
+      crypto-js: 4.2.0
+    dev: false
+
+  /@vercel/analytics@1.3.1(next@14.2.5)(react@18.3.1):
+    resolution: {integrity: sha512-xhSlYgAuJ6Q4WQGkzYTLmXwhYl39sWjoMA3nHxfkvG+WdBT25c563a7QhwwKivEOZtPJXifYHR1m2ihoisbWyA==}
+    peerDependencies:
+      next: '>= 13'
+      react: ^18 || ^19
+    peerDependenciesMeta:
+      next:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      next: 14.2.5(react-dom@18.3.1)(react@18.3.1)
+      react: 18.3.1
+      server-only: 0.0.1
+    dev: false
+
+  /@vercel/kv@2.0.0:
+    resolution: {integrity: sha512-zdVrhbzZBYo5d1Hfn4bKtqCeKf0FuzW8rSHauzQVMUgv1+1JOwof2mWcBuI+YMJy8s0G0oqAUfQ7HgUDzb8EbA==}
+    engines: {node: '>=14.6'}
+    dependencies:
+      '@upstash/redis': 1.34.0
+    dev: false
+
   /@vue/compiler-core@3.4.35:
     resolution: {integrity: sha512-gKp0zGoLnMYtw4uS/SJRRO7rsVggLjvot3mcctlMXunYNsX+aRJDqqw/lV5/gHK91nvaAAlWFgdVl020AW1Prg==}
     dependencies:
@@ -995,6 +1030,10 @@ packages:
       shebang-command: 2.0.0
       which: 2.0.2
     dev: true
+
+  /crypto-js@4.2.0:
+    resolution: {integrity: sha512-KALDyEYgpY+Rlob/iriUtjV6d5Eq+Y191A5g4UqLAi8CyGP9N1+FdVbkc1SxKc2r4YAYqG8JzO2KGL+AizD70Q==}
+    dev: false
 
   /css-tree@2.3.1:
     resolution: {integrity: sha512-6Fv1DV/TYw//QF5IzQdqsNDjx/wc8TrMBZsqjL9eW01tWb7R7k/mq+/VXfJCl7SoD5emsJop9cOByJZfs8hYIw==}
@@ -2826,6 +2865,10 @@ packages:
     engines: {node: '>=10'}
     hasBin: true
     dev: true
+
+  /server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
+    dev: false
 
   /set-function-length@1.2.2:
     resolution: {integrity: sha512-pgRc4hJ4/sNjWCSS9AmnS40x3bNMDTknHgL5UaMBTMyJnU90EgWh1Rz+MC9eFu4BuN/UwZjKQuY/1v3rM7HMfg==}

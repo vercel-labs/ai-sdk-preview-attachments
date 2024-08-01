@@ -1,3 +1,4 @@
+import { KasadaClient } from "@/utils/kasada/kasada-client";
 import "./globals.css";
 import { Metadata } from "next";
 import { Toaster } from "sonner";
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Toaster position="top-center" richColors /> {children}
+        <KasadaClient />
+        <Toaster position="top-center" richColors />
+        {children}
       </body>
     </html>
   );
