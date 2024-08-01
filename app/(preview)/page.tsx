@@ -141,7 +141,7 @@ export default function Home() {
             {messages.map((message, index) => (
               <motion.div
                 key={message.id}
-                className={`flex flex-row gap-2 w-[500px] ${
+                className={`flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0 ${
                   index === 0 ? "pt-20" : ""
                 }`}
                 initial={{ y: 5, opacity: 0 }}
@@ -177,7 +177,7 @@ export default function Home() {
 
             {isLoading &&
               messages[messages.length - 1].role !== "assistant" && (
-                <div className="flex flex-row gap-2 w-[500px]">
+                <div className="flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0">
                   <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
                     <BotIcon />
                   </div>
@@ -190,7 +190,7 @@ export default function Home() {
             <div ref={messagesEndRef} />
           </div>
         ) : (
-          <motion.div className="h-[350px] w-[500px] pt-20">
+          <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
             <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
               <p className="flex flex-row justify-center">
                 <AttachmentIcon />
@@ -227,7 +227,7 @@ export default function Home() {
         >
           <AnimatePresence>
             {files && files.length > 0 && (
-              <div className="flex flex-row gap-2 absolute bottom-12 w-[500px]">
+              <div className="flex flex-row gap-2 absolute bottom-12 px-4 w-full md:w-[500px] md:px-0">
                 {Array.from(files).map((file) =>
                   file.type.startsWith("image") ? (
                     <div key={file.name}>
@@ -248,7 +248,7 @@ export default function Home() {
                   ) : file.type.startsWith("text") ? (
                     <motion.div
                       key={file.name}
-                      className="text-[8px] leading-1 w-28 h-16 overflow-hidden text-zinc-500 border p-2 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700"
+                      className="text-[8px] leading-1 w-28 h-16 overflow-hidden text-zinc-500 border p-2 rounded-lg bg-white dark:bg-zinc-800 dark:border-zinc-700 dark:text-zinc-400"
                       initial={{ scale: 0.8, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{
@@ -268,7 +268,7 @@ export default function Home() {
 
           <input
             ref={inputRef}
-            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 max-w-[500px]"
+            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 md:max-w-[500px] w-[calc(100dvw-32px)]"
             placeholder="Send a message..."
             value={input}
             onChange={handleInputChange}
