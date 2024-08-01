@@ -55,3 +55,22 @@ export const AttachmentIcon = () => {
     </svg>
   );
 };
+
+export const VercelIcon = () => {
+  return (
+    <svg
+      height={17}
+      strokeLinejoin="round"
+      viewBox="0 0 16 16"
+      width={17}
+      style={{ color: "currentcolor" }}
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M8 1L16 15H0L8 1Z"
+        fill="currentColor"
+      ></path>
+    </svg>
+  );
+};

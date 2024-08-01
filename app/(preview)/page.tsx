@@ -1,7 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { AttachmentIcon, BotIcon, UserIcon } from "@/components/icons";
+import {
+  AttachmentIcon,
+  BotIcon,
+  UserIcon,
+  VercelIcon,
+} from "@/components/icons";
 import { useChat } from "ai/react";
 import { DragEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -192,7 +197,9 @@ export default function Home() {
         ) : (
           <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
             <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
-              <p className="flex flex-row justify-center">
+              <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
+                <VercelIcon />
+                <span>+</span>
                 <AttachmentIcon />
               </p>
               <p>
