@@ -275,7 +275,7 @@ export default function Home() {
 
           <input
             ref={inputRef}
-            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 md:max-w-[500px] w-[calc(100dvw-32px)]"
+            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 md:max-w-[500px] max-w-[calc(100dvw-32px)]"
             placeholder="Send a message..."
             value={input}
             onChange={handleInputChange}
