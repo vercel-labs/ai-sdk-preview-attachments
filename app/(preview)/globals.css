@@ -13,8 +13,18 @@
   src: url("./uncut-sans.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "geist mono";
+  src: url("./geist-mono.woff2") format("woff2");
+}
+
 * {
   font-family: "uncut sans", sans-serif;
+}
+
+code,
+pre {
+  font-family: "geist mono", monospace;
 }
 
 @media (prefers-color-scheme: dark) {
