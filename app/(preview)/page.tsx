@@ -302,7 +302,7 @@ export default function Home() {
 
         <Link
           target="_blank"
-          href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fai-sdk-preview-attachments&env=OPENAI_API_KEY&envDescription=API%20keys%20needed%20for%20this%20application.&envLink=platform.openai.com"
+          href="https://vercel.com/templates/next.js/multi-modal-chatbot"
           className="flex flex-row gap-2 items-center bg-zinc-900 px-2 py-1.5 rounded-md text-zinc-50 hover:bg-zinc-950 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-50"
         >
           <VercelIcon size={14} />
