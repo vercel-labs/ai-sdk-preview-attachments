@@ -48,6 +48,7 @@ export default function Home() {
 
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
   const [isDragging, setIsDragging] = useState(false);
 
   const handlePaste = (event: React.ClipboardEvent) => {
@@ -117,6 +118,30 @@ export default function Home() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Function to handle file selection via the upload button
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Function to handle files selected from the file dialog
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (selectedFiles) {
+      const validFiles = Array.from(selectedFiles).filter(
+        (file) =>
+          file.type.startsWith("image/") || file.type.startsWith("text/")
+      );
+
+      if (validFiles.length === selectedFiles.length) {
+        const dataTransfer = new DataTransfer();
+        validFiles.forEach((file) => dataTransfer.items.add(file));
+        setFiles(dataTransfer.files);
+      } else {
+        toast.error("Only image and text files are allowed");
+      }
+    }
+  };
 
   return (
     <div
@@ -274,14 +299,39 @@ export default function Home() {
             )}
           </AnimatePresence>
 
+          {/* Hidden file input */}
           <input
-            ref={inputRef}
-            className="bg-zinc-100 rounded-md px-2 py-1.5 w-full outline-none dark:bg-zinc-700 text-zinc-800 dark:text-zinc-300 md:max-w-[500px] max-w-[calc(100dvw-32px)]"
-            placeholder="Send a message..."
-            value={input}
-            onChange={handleInputChange}
-            onPaste={handlePaste}
+            type="file"
+            multiple
+            accept="image/*,text/*"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileChange}
           />
+
+          <div className="flex items-center w-full md:max-w-[500px] max-w-[calc(100dvw-32px)] bg-zinc-100 dark:bg-zinc-700 rounded-full px-4 py-2">
+            {/* Upload Button */}
+            <button
+              type="button"
+              onClick={handleUploadClick}
+              className="text-zinc-500 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-100 focus:outline-none mr-3"
+              aria-label="Upload Files"
+            >
+              <span className="w-5 h-5">
+                <AttachmentIcon aria-hidden="true" />
+              </span>
+            </button>
+
+            {/* Message Input */}
+            <input
+              ref={inputRef}
+              className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
+              placeholder="Send a message..."
+              value={input}
+              onChange={handleInputChange}
+              onPaste={handlePaste}
+            />
+          </div>
         </form>
       </div>
     </div>
