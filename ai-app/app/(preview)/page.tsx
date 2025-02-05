@@ -5,7 +5,7 @@ import {
   AttachmentIcon,
   BotIcon,
   UserIcon,
-  VercelIcon,
+  CapIcon,
 } from "@/components/icons";
 import { useChat } from "ai/react";
 import { DragEvent, useEffect, useRef, useState } from "react";
@@ -44,6 +44,7 @@ export default function Home() {
     useChat({
       onError: (e) =>
         toast.error(e.message),
+        streamProtocol: "text"
     });
 
   const [files, setFiles] = useState<FileList | null>(null);
@@ -224,27 +225,23 @@ export default function Home() {
           <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
             <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
               <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
-                <VercelIcon />
-                <span>+</span>
-                <AttachmentIcon />
+                <CapIcon />
+                <span>Open Model Playground - DeepSeek-R1</span>
               </p>
               <p>
-                The useChat hook supports sending attachments along with
-                messages as well as rendering previews on the client. This can
-                be useful for building applications that involve sending images,
-                files, and other media content to the AI provider.
+              Demo environment for open-source models. Markdown is not currently fully supported. The quota is extremely limited, so please use it responsibly.
               </p>
               <p>
                 {" "}
-                Learn more about the{" "}
+                Currently deployed model: {" "}
                 <Link
                   className="text-blue-500 dark:text-blue-400"
-                  href="https://sdk.vercel.ai/docs/ai-sdk-ui/chatbot#attachments-experimental"
+                  href="https://ai.azure.com/explore/models/DeepSeek-R1/version/1/registry/azureml-deepseek"
                   target="_blank"
                 >
-                  useChat{" "}
+                  DeepSeek-R1{" "}
                 </Link>
-                hook from Vercel AI SDK.
+                Azure (Global) {" "}
               </p>
             </div>
           </motion.div>

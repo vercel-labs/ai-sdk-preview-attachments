@@ -3,6 +3,9 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 export const NonMemoizedMarkdown = ({ children }: { children: string }) => {
+
+  children = children.replace(/\\n/g, "\n");
+  
   const components = {
     code: ({ node, inline, className, children, ...props }: any) => {
       const match = /language-(\w+)/.exec(className || "");
