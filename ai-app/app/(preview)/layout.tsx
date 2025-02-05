@@ -4,8 +4,8 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ai-sdk-preview-attachments.vercel.dev"),
-  title: "Attachments Preview",
-  description: "Experimental preview of attachments in useChat hook",
+  title: "Open Model Playground - DeepSeek-R1",
+  description: "Demo environment for open-source models",
 };
 
 export default function RootLayout({
