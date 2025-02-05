@@ -47,6 +47,10 @@ export default function Home() {
         streamProtocol: "text"
     });
 
+    const containsSensitiveWords = messages.some(message => 
+      /china|tianamen|taiwan/i.test(message.content)
+    );
+
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
@@ -144,6 +148,7 @@ export default function Home() {
     }
   };
 
+
   return (
     <div
       className="flex flex-row justify-center pb-20 h-dvh bg-white dark:bg-zinc-900"
@@ -206,7 +211,16 @@ export default function Home() {
                 </div>
               </motion.div>
             ))}
-
+            {containsSensitiveWords && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                style={{ backgroundColor: 'black', color: 'white', padding: '10px', borderRadius: '5px' }}
+              >
+                I see what you are trying to do :)
+              </motion.div>
+            )}
             {isLoading &&
               messages[messages.length - 1].role !== "assistant" && (
                 <div className="flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0">
