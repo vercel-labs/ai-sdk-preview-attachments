@@ -1,15 +1,29 @@
-import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import ModelClient from "@azure-rest/ai-inference";
+import { isUnexpected } from "@azure-rest/ai-inference";
+import { AzureKeyCredential } from "@azure/core-auth";
+import { NextResponse } from 'next/server';
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
 
-  const result = streamText({
-    model: openai("gpt-4o"),
-    system:
-      "do not respond on markdown or lists, keep your responses brief, you can ask the user to upload images or documents if it could help you understand the problem better",
-    messages,
+  const client = ModelClient(
+    process.env.AZURE_INFERENCE_ENDPOINT || "", 
+    new AzureKeyCredential(process.env.AZURE_INFERENCE_CREDENTIAL || "")
+  );
+
+  var response = await client.path("/chat/completions").post({
+    body: {
+        messages: messages,
+        model: "DeepSeek-R1"
+    }
   });
 
-  return result.toDataStreamResponse();
+  if (isUnexpected(response)) {
+      throw response.body.error;
+  }
+
+  const completion = response.body;
+  console.log(completion.choices[0].message.content);
+
+  return NextResponse.json(completion);
 }

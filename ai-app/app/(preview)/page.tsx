@@ -42,8 +42,8 @@ function TextFilePreview({ file }: { file: File }) {
 export default function Home() {
   const { messages, input, handleSubmit, handleInputChange, isLoading } =
     useChat({
-      onError: () =>
-        toast.error("You've been rate limited, please try again later!"),
+      onError: (e) =>
+        toast.error(e.message),
     });
 
   const [files, setFiles] = useState<FileList | null>(null);
