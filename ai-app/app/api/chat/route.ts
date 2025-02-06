@@ -2,7 +2,6 @@ import ModelClient from "@azure-rest/ai-inference";
 import { isUnexpected } from "@azure-rest/ai-inference";
 import { AzureKeyCredential } from "@azure/core-auth";
 import { NextResponse } from 'next/server';
-import { createSseStream }from '@azure/core-sse'
 
 export async function POST(req: Request) {
 
