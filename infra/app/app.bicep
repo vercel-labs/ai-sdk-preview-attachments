@@ -61,6 +61,6 @@ resource SettingsClient 'Microsoft.Web/sites/config@2022-09-01' = {
     linuxFxVersion: 'NODE|20-lts'
     numberOfWorkers: 1
     alwaysOn: true
-    appCommandLine: 'npm run build && npm start'
+    appCommandLine: 'npm start'
   }
 }
