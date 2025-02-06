@@ -47,8 +47,9 @@ export default function Home() {
         streamProtocol: "text"
     });
 
+    //Basic check for sensitive words :D
     const containsSensitiveWords = messages.some(message => 
-      /china|tianamen|taiwan/i.test(message.content)
+      /china|tiananmen|1989|taiwan/i.test(message.content)
     );
 
   const [files, setFiles] = useState<FileList | null>(null);
