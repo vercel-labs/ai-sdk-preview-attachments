@@ -7,7 +7,7 @@ import {
   UserIcon,
   VercelIcon,
 } from "@/components/icons";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { DragEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
@@ -40,11 +40,11 @@ function TextFilePreview({ file }: { file: File }) {
 }
 
 export default function Home() {
-  const { messages, input, handleSubmit, handleInputChange, isLoading } =
-    useChat({
-      onError: () =>
-        toast.error("You've been rate limited, please try again later!"),
-    });
+  const [input, setInput] = useState("");
+  const { messages, sendMessage, status } = useChat({
+    onError: () =>
+      toast.error("You've been rate limited, please try again later!"),
+  });
 
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -143,9 +143,11 @@ export default function Home() {
     }
   };
 
+  const isLoading = status === "submitted" || status === "streaming";
+
   return (
     <div
-      className="flex flex-row justify-center pb-20 h-dvh bg-white dark:bg-zinc-900"
+      className="flex flex-row justify-center pb-20 bg-white h-dvh dark:bg-zinc-900"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
@@ -153,7 +155,7 @@ export default function Home() {
       <AnimatePresence>
         {isDragging && (
           <motion.div
-            className="fixed pointer-events-none dark:bg-zinc-900/90 h-dvh w-dvw z-10 flex flex-row justify-center items-center flex flex-col gap-1 bg-zinc-100/90"
+            className="flex fixed z-10 flex-row flex-col gap-1 justify-center items-center pointer-events-none dark:bg-zinc-900/90 h-dvh w-dvw bg-zinc-100/90"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -166,9 +168,9 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col justify-between gap-4">
+      <div className="flex flex-col gap-4 justify-between">
         {messages.length > 0 ? (
-          <div className="flex flex-col gap-2 h-full w-dvw items-center overflow-y-scroll">
+          <div className="flex overflow-y-scroll flex-col gap-2 items-center h-full w-dvw">
             {messages.map((message, index) => (
               <motion.div
                 key={message.id}
@@ -183,31 +185,41 @@ export default function Home() {
                 </div>
 
                 <div className="flex flex-col gap-1">
-                  <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                    <Markdown>{message.content}</Markdown>
+                  <div className="flex flex-col gap-4 text-zinc-800 dark:text-zinc-300">
+                    <Markdown>
+                      {message.parts
+                        .filter(part => part.type === 'text')
+                        .map(part => part.text)
+                        .join('')}
+                    </Markdown>
                   </div>
                   <div className="flex flex-row gap-2">
-                    {message.experimental_attachments?.map((attachment) =>
-                      attachment.contentType?.startsWith("image") ? (
-                        <img
-                          className="rounded-md w-40 mb-3"
-                          key={attachment.name}
-                          src={attachment.url}
-                          alt={attachment.name}
-                        />
-                      ) : attachment.contentType?.startsWith("text") ? (
-                        <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
-                          {getTextFromDataUrl(attachment.url)}
-                        </div>
-                      ) : null
-                    )}
+                    {message.parts
+                      .filter(part => part.type === 'file')
+                      .map((part, partIndex) =>
+                        part.mediaType?.startsWith("image") ? (
+                          <img
+                            className="mb-3 w-40 rounded-md"
+                            key={`${message.id}-${partIndex}`}
+                            src={part.url}
+                            alt={part.filename || 'attachment'}
+                          />
+                        ) : part.mediaType?.startsWith("text") ? (
+                          <div 
+                            key={`${message.id}-${partIndex}`}
+                            className="overflow-hidden p-2 mb-3 w-40 h-24 text-xs rounded-md border text-zinc-400 dark:bg-zinc-800 dark:border-zinc-700"
+                          >
+                            {getTextFromDataUrl(part.url)}
+                          </div>
+                        ) : null
+                      )}
                   </div>
                 </div>
               </motion.div>
             ))}
 
             {isLoading &&
-              messages[messages.length - 1].role !== "assistant" && (
+              messages[messages.length - 1]?.role !== "assistant" && (
                 <div className="flex flex-row gap-2 px-4 w-full md:w-[500px] md:px-0">
                   <div className="size-[24px] flex flex-col justify-center items-center flex-shrink-0 text-zinc-400">
                     <BotIcon />
@@ -222,8 +234,8 @@ export default function Home() {
           </div>
         ) : (
           <motion.div className="h-[350px] px-4 w-full md:w-[500px] md:px-0 pt-20">
-            <div className="border rounded-lg p-6 flex flex-col gap-4 text-zinc-500 text-sm dark:text-zinc-400 dark:border-zinc-700">
-              <p className="flex flex-row justify-center gap-4 items-center text-zinc-900 dark:text-zinc-50">
+            <div className="flex flex-col gap-4 p-6 text-sm rounded-lg border text-zinc-500 dark:text-zinc-400 dark:border-zinc-700">
+              <p className="flex flex-row gap-4 justify-center items-center text-zinc-900 dark:text-zinc-50">
                 <VercelIcon />
                 <span>+</span>
                 <AttachmentIcon />
@@ -251,10 +263,11 @@ export default function Home() {
         )}
 
         <form
-          className="flex flex-col gap-2 relative items-center"
+          className="flex relative flex-col gap-2 items-center"
           onSubmit={(event) => {
-            const options = files ? { experimental_attachments: files } : {};
-            handleSubmit(event, options);
+            event.preventDefault();
+            sendMessage({ text: input, files: files || undefined });
+            setInput("");
             setFiles(null);
           }}
         >
@@ -267,7 +280,7 @@ export default function Home() {
                       <motion.img
                         src={URL.createObjectURL(file)}
                         alt={file.name}
-                        className="rounded-md w-16"
+                        className="w-16 rounded-md"
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{
@@ -314,7 +327,7 @@ export default function Home() {
             <button
               type="button"
               onClick={handleUploadClick}
-              className="text-zinc-500 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-100 focus:outline-none mr-3"
+              className="mr-3 text-zinc-500 dark:text-zinc-300 hover:text-zinc-700 dark:hover:text-zinc-100 focus:outline-none"
               aria-label="Upload Files"
             >
               <span className="w-5 h-5">
@@ -325,10 +338,10 @@ export default function Home() {
             {/* Message Input */}
             <input
               ref={inputRef}
-              className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
+              className="flex-grow bg-transparent outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
               placeholder="Send a message..."
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               onPaste={handlePaste}
             />
           </div>
