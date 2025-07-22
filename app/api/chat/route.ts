@@ -1,5 +1,5 @@
 import { openai } from "@ai-sdk/openai";
-import { streamText } from "ai";
+import { streamText, convertToModelMessages } from "ai";
 
 export async function POST(req: Request) {
   const { messages } = await req.json();
@@ -8,8 +8,8 @@ export async function POST(req: Request) {
     model: openai("gpt-4o"),
     system:
       "do not respond on markdown or lists, keep your responses brief, you can ask the user to upload images or documents if it could help you understand the problem better",
-    messages,
+    messages: convertToModelMessages(messages),
   });
 
-  return result.toDataStreamResponse();
+  return result.toUIMessageStreamResponse();
 }
