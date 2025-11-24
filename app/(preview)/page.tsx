@@ -12,7 +12,7 @@ import { DragEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
 import Link from "next/link";
-import { Markdown } from "@/components/markdown";
+import { Streamdown } from "streamdown";
 
 const getTextFromDataUrl = (dataUrl: string) => {
   const base64 = dataUrl.split(",")[1];
@@ -184,7 +184,7 @@ export default function Home() {
 
                 <div className="flex flex-col gap-1">
                   <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                    <Markdown>{message.content}</Markdown>
+                    <Streamdown>{message.content}</Streamdown>
                   </div>
                   <div className="flex flex-row gap-2">
                     {message.experimental_attachments?.map((attachment) =>
