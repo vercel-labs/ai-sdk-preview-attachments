@@ -7,7 +7,7 @@ import {
   UserIcon,
   VercelIcon,
 } from "@/components/icons";
-import { useChat } from "ai/react";
+import { useChat } from "@ai-sdk/react";
 import { DragEvent, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
@@ -40,12 +40,13 @@ function TextFilePreview({ file }: { file: File }) {
 }
 
 export default function Home() {
-  const { messages, input, handleSubmit, handleInputChange, isLoading } =
-    useChat({
-      onError: () =>
-        toast.error("You've been rate limited, please try again later!"),
-    });
+  const { messages, sendMessage, status } = useChat({
+    onError: () =>
+      toast.error("You've been rate limited, please try again later!"),
+  });
+  const isLoading = status === "submitted" || status === "streaming";
 
+  const [input, setInput] = useState("");
   const [files, setFiles] = useState<FileList | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // Reference for the hidden file input
@@ -184,21 +185,30 @@ export default function Home() {
 
                 <div className="flex flex-col gap-1">
                   <div className="text-zinc-800 dark:text-zinc-300 flex flex-col gap-4">
-                    <Streamdown>{message.content}</Streamdown>
+                    {message.parts.map((part, partIndex) =>
+                      part.type === "text" ? (
+                        <Streamdown key={partIndex}>{part.text}</Streamdown>
+                      ) : null
+                    )}
                   </div>
                   <div className="flex flex-row gap-2">
-                    {message.experimental_attachments?.map((attachment) =>
-                      attachment.contentType?.startsWith("image") ? (
-                        <img
-                          className="rounded-md w-40 mb-3"
-                          key={attachment.name}
-                          src={attachment.url}
-                          alt={attachment.name}
-                        />
-                      ) : attachment.contentType?.startsWith("text") ? (
-                        <div className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3">
-                          {getTextFromDataUrl(attachment.url)}
-                        </div>
+                    {message.parts.map((part, partIndex) =>
+                      part.type === "file" ? (
+                        part.mediaType?.startsWith("image") ? (
+                          <img
+                            className="rounded-md w-40 mb-3"
+                            key={partIndex}
+                            src={part.url}
+                            alt=""
+                          />
+                        ) : part.mediaType?.startsWith("text") ? (
+                          <div
+                            key={partIndex}
+                            className="text-xs w-40 h-24 overflow-hidden text-zinc-400 border p-2 rounded-md dark:bg-zinc-800 dark:border-zinc-700 mb-3"
+                          >
+                            {getTextFromDataUrl(part.url)}
+                          </div>
+                        ) : null
                       ) : null
                     )}
                   </div>
@@ -253,8 +263,9 @@ export default function Home() {
         <form
           className="flex flex-col gap-2 relative items-center"
           onSubmit={(event) => {
-            const options = files ? { experimental_attachments: files } : {};
-            handleSubmit(event, options);
+            event.preventDefault();
+            sendMessage({ text: input, ...(files ? { files } : {}) });
+            setInput("");
             setFiles(null);
           }}
         >
@@ -328,7 +339,7 @@ export default function Home() {
               className="bg-transparent flex-grow outline-none text-zinc-800 dark:text-zinc-300 placeholder-zinc-400"
               placeholder="Send a message..."
               value={input}
-              onChange={handleInputChange}
+              onChange={(e) => setInput(e.target.value)}
               onPaste={handlePaste}
             />
           </div>
