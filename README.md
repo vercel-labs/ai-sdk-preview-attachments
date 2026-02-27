@@ -4,7 +4,7 @@ This example demonstrates how to use the [Vercel AI SDK](https://sdk.vercel.ai/d
 
 ## Deploy your own
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fai-sdk-preview-attachments&env=AI_GATEWAY_API_KEY&envDescription=API%20key%20needed%20for%20application&envLink=vercel.com/docs/ai-gateway)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel-labs%2Fai-sdk-preview-attachments)
 
 ## How to use
 
