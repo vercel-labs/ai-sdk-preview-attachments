@@ -1,7 +1,14 @@
-import { KasadaClient } from "@/utils/kasada/kasada-client";
 import "./globals.css";
+import { BotIdClient } from "botid/client";
 import { Metadata } from "next";
 import { Toaster } from "sonner";
+
+const protectedRoutes = [
+  {
+    path: "/api/chat",
+    method: "POST",
+  },
+];
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://ai-sdk-preview-attachments.vercel.app"),
@@ -16,8 +23,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <BotIdClient protect={protectedRoutes} />
+      </head>
       <body>
-        <KasadaClient />
         <Toaster position="top-center" richColors />
         {children}
       </body>
